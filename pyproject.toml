@@ -1,0 +1,45 @@
+[project]
+name = "cover-shadow-value"
+version = "0.1.0"
+description = "Cover Shadow Value: valuing off-ball defensive positioning with body-orientation cones (SkillCorner open data)."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Diogo Melo" }]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy>=1.26,<2.3",     # validated with numpy 2.2 and pandas 2.3; pandas 3 changes dtypes
+    "pandas>=2.2,<3",
+    "pyarrow>=15",        # tables are stored as parquet
+    "scipy>=1.12,<1.18",
+    "pyyaml>=6",
+    "requests>=2.31",
+    "matplotlib>=3.8",
+    "mplsoccer>=1.8",
+    "moviepy>=2.2",       # C06 animation
+    "imageio-ffmpeg>=0.6",  # ships ffmpeg, no separate install needed
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "ipykernel>=6.29",
+    "jupyterlab>=4",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/footy"]
+
+[tool.uv]
+default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "projects/cover_shadow/tests"]
+pythonpath = ["projects/cover_shadow"]  # tests import `metrica` and the project scripts

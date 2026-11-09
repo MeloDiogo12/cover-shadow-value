@@ -1,0 +1,54 @@
+# Identidade visual. Para trabalhar para um clube, cria um ficheiro novo
+# (ex.: config/brand_clube_x.yaml) e passa-o a load_brand("brand_clube_x").
+name: cover-shadow-value
+handle: "@diogo12melo"          # aparece no rodapé dos gráficos e vídeos
+
+# Paleta antiga (tema 4 · "Azul-noite e laranja", escolhido a 16/10/2026; substituída a 9/11/2026, fase 10c):
+#   background/pitch #0B1426 · lines #34476A · text #EAF0F8 · text_muted #8A9BB3 · primary #FF8A00 · secondary #3FA7FF
+#   neutral #2A3A55 · goal #3FA7FF · save #FF4D6D
+#
+# Paleta nova (9/11/2026): fundo #02070A, azul #0297DE, coral #FC734D, em duas variantes. `load_brand(variante=...)` escolhe uma.
+#   escura: redes sociais e vídeo (por omissão).  clara: artigo (fundo branco).
+# Chaves: primary/secondary = áreas, barras e pontos; primary_ink/secondary_ink = texto e linhas finas (na escura são iguais;
+# na clara são mais escuras para dar contraste ≥ 4:1 sobre branco). save = marcação (anel tracejado no tom do texto: ver D47).
+variants:
+  escura:
+    background: "#02070A"
+    pitch: "#02070A"
+    lines: "#2B3B50"
+    text: "#EAF0F8"
+    text_muted: "#8FA0B5"      # contraste 7,6:1 sobre o fundo
+    primary: "#FC734D"         # cor de destaque principal (coral: a assinatura)
+    secondary: "#0297DE"       # cor de contraste (adversário, comparação)
+    primary_ink: "#FC734D"
+    secondary_ink: "#0297DE"
+    neutral: "#3A4A5F"         # dados que não são o foco
+    goal: "#0297DE"            # golos (azul)
+    save: "#EAF0F8"            # marcação/defesas: tom do texto, desenhado a tracejado (não se confunde com o coral nem com o azul)
+  clara:
+    background: "#FFFFFF"
+    pitch: "#F5F6F8"
+    lines: "#C3CAD2"
+    text: "#02070A"
+    text_muted: "#586574"      # contraste 6,0:1 sobre branco
+    primary: "#FC734D"         # áreas, barras e pontos
+    secondary: "#0297DE"
+    primary_ink: "#D9532E"     # texto e linhas finas (4,0:1 sobre branco)
+    secondary_ink: "#0277B6"   # (4,9:1 sobre branco)
+    neutral: "#C8D0D8"
+    goal: "#0297DE"
+    save: "#02070A"
+
+font:
+  family: "DejaVu Sans"      # troca por uma fonte instalada no sistema (ex.: "Inter")
+  title_size: 22
+  body_size: 12
+
+video:
+  width: 1080
+  height: 1920
+  fps: 30
+  safe_top: 250              # px no topo sem informação crítica (interface das redes)
+  safe_bottom: 400           # px no fundo sem informação crítica
+
+attribution: "Dados: {source}"

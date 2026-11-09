@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this code or the metric, please cite it as below."
+title: "Cover Shadow Value"
+type: software
+authors:
+  - family-names: Melo
+    given-names: Diogo
+    affiliation: "Independent researcher"
+date-released: 2026-11-09
+license: MIT
+version: 0.1.0
+abstract: >-
+  Code that computes the Cover Shadow Value, a metric that values off-ball defensive
+  positioning: a defender's body-orientation cone closes passing lanes, and that has value even
+  without a tackle or an interception. Built on SkillCorner open data (tracking, events, body pose).
+keywords:
+  - football analytics
+  - tracking data
+  - body pose
+  - defending

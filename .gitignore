@@ -1,0 +1,22 @@
+# data (downloaded, see README)
+data/
+
+# generated outputs (only the article numbers file is tracked)
+outputs/*
+!outputs/cover_shadow/
+outputs/cover_shadow/*
+!outputs/cover_shadow/artigo_v31.json
+
+# environments and caches
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+*.egg-info/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
