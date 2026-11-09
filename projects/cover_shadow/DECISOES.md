@@ -163,8 +163,8 @@ trazia (posição + velocidade × 0,7 s) e só depois corre em linha reta a 5 m/
   `maxspeed = 12`), velocidades acima de 12 m/s são tratadas como erro do tracking.
 - *Porquê:* com 0,7 s de reação, tratar o defesa como parado atrasava quem já corria para a linha.
 
-### D24 · Revisão por treinador, primeira ronda (28/10)
-15 lances revistos pelo Diogo (C1, C2): sombras 7 sim / 8 em parte / 0 não; marcação 5 sim /
+### D24 · Revisão de lances, primeira ronda, pelo autor (28/10)
+15 lances revistos pelo autor (C1, C2): sombras 7 sim / 8 em parte / 0 não; marcação 5 sim /
 9 em parte / 1 não. Os 5 lances com mais ameaça negada eram quase todos cruzamentos, onde a métrica
 faz menos sentido. As decisões D25–D30 resultam desta revisão (iteração CRISP-DM: volta à modelação).
 
@@ -324,7 +324,7 @@ da linha. Na v3 isto não importava (só contavam as linhas tapadas), mas a v4 a
 - **Tabelas:** a v4 anterior (D38) mantém-se em `data/processed/cover_shadow/v4_sem_fundo/` (e `avaliacao_v4/`, `outputs/cover_shadow/avaliacao_v4_sem_fundo.json`, `revisao_v4_sem_fundo/`,
   `revisao_lances_v4_sem_fundo.xlsx`); a v4 com fundo está em `v4/`, as variantes essenciais em `avaliacao_v4_fundo/` e a variante sem o guarda-redes em `v4_sem_guarda_redes/`.
   As tabelas de linhas têm a coluna nova `p_fundo` (= `p_l(∅)`). Com F vazio (ou `p_fundo = 1`) a v4 com fundo é igual à anterior (teste e verificação nos dados dos dois jogos: diferença 0).
-- **4.ª ronda do treinador** refeita com o fundo (ainda não tinha sido feita): D01–D03 voltam a escolher-se com o fundo, W01–W08 mantêm-se; legenda para treinadores nas imagens e no topo da folha.
+- **4.ª ronda de revisão** refeita com o fundo (ainda não tinha sido feita): D01–D03 voltam a escolher-se com o fundo, W01–W08 mantêm-se; legenda para treinadores nas imagens e no topo da folha.
 - Números (só tabelas, sem leitura) em `08_metrica_v4.ipynb` (secção 8) e `09_avaliacao_v4.ipynb` (secções 1 e 8). O artigo, as figuras do artigo e as animações não se tocaram.
 - *Estado:* implementado; a decisão de adotar o fundo como definição da v4 é do Diogo.
 
@@ -462,6 +462,12 @@ Decisão do Diogo: nova base de cores, mantendo a ideia azul + coral da marca. S
 - **Duas variantes** (`load_brand(variante="escura"|"clara")`, escura por omissão): *escura* para redes sociais e vídeo; *clara* para o artigo (fundo branco, campo `#F5F6F8`). Na clara, áreas, barras e pontos usam o azul e o coral; texto e linhas finas usam as «tintas» `secondary_ink #0277B6` e `primary_ink #D9532E` (≥ 4:1 sobre branco). Texto principal `#02070A`. Os defesas são brancos na escura e quase pretos na clara; as legendas geram-se da variante (`idioma.cor_defesa`).
 - **Cor da marcação: hipótese (b), anel e linha tracejados no tom do texto** (`save` = `#EAF0F8` na escura, `#02070A` na clara). O vermelho-rosa anterior (`#FF4D6D`) ficava a ΔE ≈ 31 do coral novo (≈ 21 em deuteranopia). ΔE (CIELAB, CIE76; matrizes de Machado 2009, severidade 1) mínimo face ao coral e ao azul: (b) escura 54 normal / 58 deuteranopia / 49 protanopia / 45 tritanopia; (b) clara 61 / 61 / 59 / 57. (a) amarelo falha: `#FFD23F` na escura fica a 29 (deuteranopia) e 31 (tritanopia, face ao branco) do coral/branco; o mostarda `#B8860B` na clara fica a 10 em deuteranopia (24 em protanopia). Ressalva: no tracejado o tom é o dos defesas (ΔE 0), por isso o que o separa deles é a forma (anel maior, vazado, tracejado), não a cor.
 - **Figura 14:** «Log-loss, n = 1 408» (vírgula recuperada) e nota «Sombra = 1 − índice de chegada» / «Shadow = 1 − arrival index».
+
+### D48 · Quem fez cada ronda de revisão (9/11)
+- A 1.ª ronda de revisão de lances (D24) foi feita pelo próprio autor, para afinar a definição; a 2.ª e a 3.ª foram feitas por treinadores externos ao trabalho. Em nenhuma ronda o revisor sabia a que grupo pertencia cada lance. Não se afirma se a 2.ª e a 3.ª foram ou não o mesmo treinador.
+- O artigo (PT e EN), a Figura 5 (título, subtítulo e rótulos das rondas: «autor» / «treinador») e o README foram alinhados com isto; deixou de se falar em «revisão por um treinador».
+- Publica-se `referencias/revisao_contagens.csv` (ronda, versão, revisor, lances, pergunta, sim, em parte, não: só contagens, sem ids de lance, comentários nem nomes). A Figura 5 gera-se das folhas preenchidas se existirem e, se não, deste CSV (com as duas, verifica-se que coincidem); as folhas com os comentários dos revisores não são publicadas.
+- Corrigida a legenda inglesa da Figura 5, que tinha as contagens trocadas entre rondas (a figura estava certa); há agora um teste.
 
 ---
 

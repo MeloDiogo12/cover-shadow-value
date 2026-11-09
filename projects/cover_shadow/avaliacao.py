@@ -22,7 +22,7 @@ from scipy.stats import spearmanr
 
 from footy.paths import DATA_PROCESSED
 
-PASTA_AVALIACAO = DATA_PROCESSED / "cover_shadow" / "avaliacao"  # v1: antes da revisão do treinador (D24)
+PASTA_AVALIACAO = DATA_PROCESSED / "cover_shadow" / "avaliacao"  # v1: antes da 1.ª ronda de revisão (D24)
 PASTA_AVALIACAO_V2 = DATA_PROCESSED / "cover_shadow" / "avaliacao_v2"  # v2: com as decisões D25 a D30
 PASTA_AVALIACAO_V3 = DATA_PROCESSED / "cover_shadow" / "avaliacao_v3"  # v3: com D33 e D34
 PASTA_AVALIACAO_V31 = DATA_PROCESSED / "cover_shadow" / "avaliacao_v3_1"  # v3.1: v3 + linhas de até 35 m (D43)

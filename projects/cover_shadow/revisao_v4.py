@@ -1,4 +1,4 @@
-"""Fase 8d · figuras, clips e folha da 4.ª ronda de revisão pelo treinador (C1 e C2), com a métrica v4.
+"""Fase 8d · figuras, clips e folha da 4.ª ronda de revisão (C1 e C2), com a métrica v4.
 
 Lances: os 8 da 3.ª ronda (W01–W08, para comparar) e os 3 momentos com a dissuasão (D) mais negativa (D01–D03), para ver se a
 sombra empurrou o portador para uma opção mais perigosa. Cada lance tem uma figura com o valor de cada defesa na v4 (interceção

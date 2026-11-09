@@ -17,6 +17,14 @@ CTX = idi.ROTULOS_CONTEXTO["en"]
 NOTA = fl.TEXTOS["en"]["nota_soma"]
 
 
+def linhas_revisoes(r: dict) -> str:
+    """Contagens sim/em parte/não por ronda. As chaves de `r` são os nomes PT das rondas (por ordem de inserção vêm da 3.ª à 1.ª),
+    por isso o rótulo inglês procura-se pelo nome e não pela posição."""
+    rondas = {nome: en for (nome, _), en in zip(ag.RONDAS, ag.TEXTOS["en"]["rv_rondas"])}
+    return "; ".join(f"{rondas[k]}: shadows {v['sombras']['sim']}/{v['sombras']['em parte']}/{v['sombras']['não']}, marking "
+                     f"{v['marcacao']['sim']}/{v['marcacao']['em parte']}/{v['marcacao']['não']}" for k, v in r.items())
+
+
 def legendas(n: dict) -> str:
     pt, pct, mil = idi.formatadores("en", menos=True)
     U = "risk"
@@ -69,13 +77,9 @@ def legendas(n: dict) -> str:
         L += [f"- {rot}: {txt}."]
     L += ["", f"{mil(ft['sem_fase'])} moments with no phase assigned are left out of the figure but count in the total.", "",
           "Numbers: `avaliacao_v31.pct_por_contexto` on the v3.1 base in risk; `outputs/cover_shadow/artigo_v31.json`, section `risco.fase_e_terco`.", ""]
-    r = n["revisoes"]
-    rondas = dict(zip(r, ag.TEXTOS["en"]["rv_rondas"]))
-    linhas = "; ".join(f"{rondas[k]}: shadows {v['sombras']['sim']}/{v['sombras']['em parte']}/{v['sombras']['não']}, marking "
-                       f"{v['marcacao']['sim']}/{v['marcacao']['em parte']}/{v['marcacao']['não']}" for k, v in r.items())
     L += ["### agregado_revisoes.png (Figure 5)", "",
-          f"Coach's answers (yes / partly / no) in the three review rounds: {linhas}.", "",
-          f"Numbers: filled-in sheets (`revisao_lances_preenchida*.xlsx`); `{NB}`, section 1 (1.1 to 1.4).", ""]
+          f"Answers (yes / partly / no) in the three review rounds: {linhas_revisoes(n['revisoes'])}.", "",
+          f"Numbers: filled-in sheets (`revisao_lances_preenchida*.xlsx`) or `referencias/revisao_contagens.csv`; `{NB}`, section 1 (1.1 to 1.4).", ""]
     v = n["versoes"]
     txt = "; ".join(f"{k.replace('v3_1', 'v3.1').replace('_', ' · ')}: {pct(x['pct_negada'])} denied, {pct(x['pct_excluidas'])} excluded" for k, x in v.items())
     L += ["### agregado_versoes.png (Figure 1)", "",

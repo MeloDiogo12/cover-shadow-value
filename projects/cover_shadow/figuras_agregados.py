@@ -83,12 +83,12 @@ TEXTOS = {
                     "Terço = onde a posse começou (etiqueta SkillCorner).\nÍndice de fecho da linha, não probabilidade calibrada. "
                     "Fora da figura: {sem_fase} momentos sem fase atribuída."),
         # revisões
-        "rv_titulo": "Revisão de lances por um treinador, em três rondas",
-        "rv_sub": ("Respostas a duas perguntas sobre cada lance (15, 15 e 8 lances); cada ronda com a definição "
-                   "da métrica desse momento"),
+        "rv_titulo": "Revisão de lances, em três rondas",
+        "rv_sub": ("Respostas a duas perguntas sobre cada lance. A 1.ª ronda pelo autor, a 2.ª e a 3.ª por treinadores externos ao trabalho "
+                   "(15, 15 e 8 lances);\ncada ronda com a definição da métrica desse momento"),
         "rv_sombras": "As sombras fazem sentido?",
         "rv_marcacao": "A marcação está certa?",
-        "rv_rondas": ("1.ª ronda · v1", "2.ª ronda · v2", "3.ª ronda · v3"),
+        "rv_rondas": ("1.ª ronda · v1 · autor", "2.ª ronda · v2 · treinador", "3.ª ronda · v3 · treinador"),
         "rv_respostas": ("sim", "em parte", "não"),
         "rv_nota": "Número de lances em cada resposta; barras a 100 %. As rondas usam lances diferentes (sem repetir posses).",
         # C3
@@ -151,12 +151,12 @@ TEXTOS = {
         "ft_nota": ("A moment = a frame with at least one evaluated lane. Faded bar: fewer than {minimo} moments. "
                     "Third = where the possession started (SkillCorner label).\nLane-closure index, not a calibrated probability. "
                     "Outside the figure: {sem_fase} moments with no phase assigned."),
-        "rv_titulo": "Review of plays by a coach, in three rounds",
-        "rv_sub": ("Answers to two questions about each play (15, 15 and 8 plays); each round with the metric definition "
-                   "of that moment"),
+        "rv_titulo": "Review of plays, in three rounds",
+        "rv_sub": ("Answers to two questions about each play. The 1st round by the author, the 2nd and 3rd by coaches external to the work "
+                   "(15, 15 and 8 plays);\neach round with the metric definition of that moment"),
         "rv_sombras": "Do the shadows make sense?",
         "rv_marcacao": "Is the marking right?",
-        "rv_rondas": ("1st round · v1", "2nd round · v2", "3rd round · v3"),
+        "rv_rondas": ("1st round · v1 · author", "2nd round · v2 · coach", "3rd round · v3 · coach"),
         "rv_respostas": ("yes", "partly", "no"),
         "rv_nota": "Number of plays in each answer; bars at 100%. The rounds use different plays (no repeated possessions).",
         "c3_titulo": "Shadow on the lane followed vs the alternatives",
@@ -365,15 +365,69 @@ def figura_fase_e_terco(JG: dict, brand: Brand, destino: Path, idioma: str = "pt
 
 RONDAS = [("1.ª ronda · v1", "revisao_lances_preenchida.xlsx"), ("2.ª ronda · v2", "revisao_lances_preenchidas_v2.xlsx"),
           ("3.ª ronda · v3", "revisao_lances_preenchida_v3.xlsx")]
+REVISORES = ("autor", "treinador externo", "treinador externo")  # quem fez cada ronda; em nenhuma o revisor sabia o grupo do lance
 RESPOSTAS = ("sim", "em parte", "não")
+PERGUNTAS = ("sombras", "marcacao")
+PASTA_REVISOES = PROJECTS / "cover_shadow"
+CSV_REVISOES = PASTA_REVISOES / "referencias" / "revisao_contagens.csv"
+COLUNAS_CSV = ["ronda", "versao", "revisor", "lances", "pergunta", "sim", "em_parte", "nao"]
 
 
-def figura_revisoes(brand: Brand, destino: Path, idioma: str = "pt") -> dict:
+def contagens_das_folhas(pasta: Path = PASTA_REVISOES) -> dict | None:
+    """{ronda: {pergunta: {sim, em parte, não, n}}} das folhas preenchidas; `None` se alguma faltar (as folhas têm os
+    comentários dos revisores e não são publicadas)."""
+    if not all((pasta / ficheiro).exists() for _, ficheiro in RONDAS):
+        return None
+    saida = {}
+    for nome, ficheiro in RONDAS:
+        folha = ler_folha_xlsx(pasta / ficheiro)
+        saida[nome] = {}
+        for coluna in PERGUNTAS:
+            contagem = {r: int((folha[coluna] == r).sum()) for r in RESPOSTAS}
+            assert sum(contagem.values()) == len(folha), (nome, coluna, contagem)
+            saida[nome][coluna] = {**contagem, "n": len(folha)}
+    return saida
+
+
+def contagens_do_csv(csv: Path = CSV_REVISOES) -> dict | None:
+    """As mesmas contagens, lidas de `referencias/revisao_contagens.csv` (só contagens: sem lances, comentários nem nomes)."""
+    if not csv.exists():
+        return None
+    saida = {}
+    for r in pd.read_csv(csv).itertuples():
+        nome = RONDAS[int(r.ronda) - 1][0]
+        saida.setdefault(nome, {})[r.pergunta] = {"sim": int(r.sim), "em parte": int(r.em_parte), "não": int(r.nao), "n": int(r.lances)}
+    return saida
+
+
+def contagens_revisoes(pasta: Path = PASTA_REVISOES, csv: Path | None = None) -> dict:
+    """Contagens das três rondas: das folhas se existirem, senão do CSV; havendo as duas, têm de coincidir."""
+    das_folhas, do_csv = contagens_das_folhas(pasta), contagens_do_csv(CSV_REVISOES if csv is None else csv)
+    if das_folhas is not None and do_csv is not None:
+        assert das_folhas == do_csv, "revisao_contagens.csv não coincide com as folhas preenchidas"
+    contagens = das_folhas if das_folhas is not None else do_csv
+    if contagens is None:
+        raise FileNotFoundError(f"sem folhas preenchidas em {pasta} nem {CSV_REVISOES}")
+    return contagens
+
+
+def escrever_csv_revisoes(destino: Path = CSV_REVISOES, pasta: Path = PASTA_REVISOES) -> None:
+    """Gera o CSV de contagens a partir das folhas preenchidas (corre-se onde elas existem, i.e. no footy-lab)."""
+    contagens = contagens_das_folhas(pasta)
+    assert contagens is not None, "faltam folhas preenchidas"
+    linhas = [[i, f"v{i}", REVISORES[i - 1], c["n"], pergunta, c["sim"], c["em parte"], c["não"]]
+              for i, (nome, _) in enumerate(RONDAS, start=1) for pergunta, c in contagens[nome].items()]
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(linhas, columns=COLUNAS_CSV).to_csv(destino, index=False, lineterminator="\n")
+
+
+def figura_revisoes(brand: Brand, destino: Path, idioma: str = "pt", contagens: dict | None = None) -> dict:
     cor = brand.colors
     T = lambda chave, **v: texto(idioma, chave, **v)
     cores = {"sim": cor["secondary"], "em parte": cor["text_muted"], "não": cor["text"]}
     tinta = {"sim": cor["background"], "em parte": cor["background"], "não": cor["background"]}
-    folhas = {nome: ler_folha_xlsx(PROJECTS / "cover_shadow" / ficheiro) for nome, ficheiro in RONDAS}
+    contagens = contagens_revisoes() if contagens is None else contagens
+    folhas = {nome: contagens[nome] for nome, _ in RONDAS}
     fig = nova_figura(brand, T("rv_titulo"), T("rv_sub"))
     eixos = [fig.add_axes((0.20, 0.20, 0.35, 0.62)), fig.add_axes((0.62, 0.20, 0.35, 0.62))]
     numeros = {}
@@ -383,9 +437,9 @@ def figura_revisoes(brand: Brand, destino: Path, idioma: str = "pt") -> dict:
         ax.spines["bottom"].set_visible(False)
         ax.set_xticks([])
         for i, (nome, folha) in enumerate(reversed(list(folhas.items()))):
-            n = len(folha)
+            n = folha[coluna]["n"]
             esquerda = 0.0
-            contagem = {r: int((folha[coluna] == r).sum()) for r in RESPOSTAS}
+            contagem = {r: folha[coluna][r] for r in RESPOSTAS}
             assert sum(contagem.values()) == n, (nome, coluna, contagem)
             numeros.setdefault(nome, {})[coluna] = {**contagem, "n": n}
             for r in RESPOSTAS:

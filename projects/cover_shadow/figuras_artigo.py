@@ -142,8 +142,8 @@ def legendas(n: dict) -> str:
         linhas = "; ".join(f"{k}: sombras {v['sombras']['sim']}/{v['sombras']['em parte']}/{v['sombras']['não']}, marcação "
                            f"{v['marcacao']['sim']}/{v['marcacao']['em parte']}/{v['marcacao']['não']}" for k, v in r.items())
         L += ["### agregado_revisoes.png", "",
-              f"Respostas do treinador (sim / em parte / não) nas três rondas de revisão: {linhas}.", "",
-              f"Números: folhas preenchidas (`revisao_lances_preenchida*.xlsx`); `{NB}`, secção 1 (1.1 a 1.4).", ""]
+              f"Respostas (sim / em parte / não) nas três rondas de revisão: {linhas}.", "",
+              f"Números: folhas preenchidas (`revisao_lances_preenchida*.xlsx`) ou `referencias/revisao_contagens.csv`; `{NB}`, secção 1 (1.1 a 1.4).", ""]
     if "versoes" in n:
         v = n["versoes"]
         txt = "; ".join(f"{k.replace('v3_1', 'v3.1').replace('_', ' · ')}: {pt(x['pct_negada'])} % negada, {pt(x['pct_excluidas'])} % excluídas" for k, x in v.items())

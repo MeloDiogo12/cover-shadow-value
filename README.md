@@ -1,6 +1,6 @@
 # Cover Shadow Value
 
-A defender who is not touching the ball can still take passes away. Cover Shadow Value (CSV) measures it: the
+A defender who is not touching the ball can still take passes away. Cover Shadow Value measures it: the
 cone behind a defender's trunk (taken from body pose, not from the ball) closes the passing lanes that cross it,
 and closing a lane has value even without a tackle or an interception. This repository computes the metric on
 the SkillCorner open data (A-League 2024/25: tracking, events and body pose) and reproduces the numbers and
@@ -104,8 +104,9 @@ Figure numbers are those of the article: 1 `agregado_versoes`, 2 `c06_passo4_con
 6 `agregado_fase_e_terco`, 7 `agregado_c3_sombra_escolhida`, 8 `agregado_c5_tronco_vs_bola`,
 9 `c06_corpo_vs_bola`, 10 `agregado_c4_estabilidade`, 11 `novo_c8_escolha_do_passe`, 12 `novo_moedas_por_fase`,
 13 `novo_pressao_alta_goodwin`, 14 `novo_xpass_calibracao_e_gamma`, 15 `c03_lance`,
-16 `orientacao_bola_vs_frente`. Figure 5 summarises the answers of a coach who reviewed plays; those answer sheets
-are not published, so that figure is provided as an image only.
+16 `orientacao_bola_vs_frente`. Figure 5 summarises the three rounds of play review, the first by the author and
+the following two by coaches external to the work; it is generated from `projects/cover_shadow/referencias/revisao_contagens.csv`
+(the sheets with the reviewers' comments are not published).
 
 ## Structure
 

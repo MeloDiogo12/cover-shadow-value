@@ -1,4 +1,4 @@
-"""Fase 5 · figuras, clips e folha de revisão para a revisão por um treinador (C1 e C2).
+"""Fase 5 · figuras, clips e folha de revisão para a revisão de lances (C1 e C2).
 
 Para cada lance escolhido gera uma figura completa (linhas de passe, quem marca, cones,
 probabilidades e ameaça negada por defesa) e um clip de ~3 s centrado no momento. A folha

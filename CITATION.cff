@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this code or the metric, please cite it as below."
-title: "Cover Shadow Value"
+title: "Cover Shadow Value: measuring the value of cover shadows with tracking and body orientation"
 type: software
 authors:
   - family-names: Melo
