@@ -15,6 +15,7 @@ import time
 import avaliacao as av
 import avaliacao_v31 as a31
 import pandas as pd
+from entradas import exigir
 from metrica.pipeline import calcular_jogo
 from preparar_dados import caminho_tabela
 from reprodutibilidade_v4 import comparar_tabelas, correr, correr_testes
@@ -28,7 +29,7 @@ DESTINO = output_dir("cover_shadow") / "reprodutibilidade_v31.json"
 def main() -> None:
     jogos = list(sc.JOGOS_COM_POSE)
     pasta = av.PASTAS["v3_1"]
-    antes = {("tabela", j): pd.read_parquet(caminho_tabela(j)) for j in jogos}
+    antes = {("tabela", j): pd.read_parquet(exigir(caminho_tabela(j), f"preparar_dados.py --jogo {j}")) for j in jogos}
     antes |= {(t, j): pd.read_parquet(av.caminho_variante(j, "base", t, pasta)) for j in jogos for t in ("linhas", "atribuicoes")}
     antes |= {("ultrapassados", j): a31.ultrapassados_guardados(j) for j in jogos}
     tempos, resultado = {}, {"tabelas": {}}

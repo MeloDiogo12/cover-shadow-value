@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import NamedTuple
 
 import pandas as pd
+from entradas import exigir
 from preparar_dados import caminho_tabela
 
 from footy.ingest import skillcorner as sc
@@ -37,7 +38,7 @@ def zona_das_posses(eventos: pd.DataFrame) -> pd.DataFrame:
 
 def carregar_tabela(jogo: int) -> pd.DataFrame:
     """Tabela da fase 3 com a posição do corpo quando há pose (D12) e a zona de cada posse (D27)."""
-    t = pd.read_parquet(caminho_tabela(jogo)).merge(zona_das_posses(sc.ler_eventos(jogo)), on="posse_id", how="left")
+    t = pd.read_parquet(exigir(caminho_tabela(jogo), f"preparar_dados.py --jogo {jogo}")).merge(zona_das_posses(sc.ler_eventos(jogo)), on="posse_id", how="left")
     t["x_tracking"], t["y_tracking"] = t["x"], t["y"]
     t["x"] = t["x_pose"].where(t["tem_pose"], t["x"])
     t["y"] = t["y_pose"].where(t["tem_pose"], t["y"])

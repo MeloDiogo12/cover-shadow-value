@@ -13,6 +13,7 @@ import avaliacao_v31 as a31
 import figuras_agregados as ag
 import idioma as idi
 import matplotlib.pyplot as plt
+from entradas import exigir
 from figuras_agregados import DPI, estilo_eixo, nota, nova_figura, pt
 
 from footy.paths import output_dir
@@ -79,7 +80,8 @@ TEXTOS = {
 
 
 def ler(nome: str) -> dict:
-    return json.loads((SAIDA / nome).read_text(encoding="utf-8"))
+    corre = {"modelo_escolha.json": "modelo_escolha.py", "xpass_v4.json": "avaliacao_xpass.py"}.get(nome, "os passos 3 a 9 do README")
+    return json.loads(exigir(SAIDA / nome, corre).read_text(encoding="utf-8"))
 
 
 def ponto_com_intervalo(ax, y: float, valor: float, baixo: float, alto: float, cor: str, fundo: str, texto: str, fonte: float = 12.5) -> None:

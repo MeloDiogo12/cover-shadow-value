@@ -23,6 +23,7 @@ from typing import NamedTuple
 
 import numpy as np
 import pandas as pd
+from entradas import exigir
 from escolha import LIMITE_INTERVALO_S, PASTA_SAIDA
 from scipy.optimize import minimize
 
@@ -274,7 +275,7 @@ def descrever_score_da_skillcorner(dados: pd.DataFrame) -> dict:
 
 def calcular() -> dict:
     """Todos os números da fase 8b: funil, ajuste conjunto, avaliação fora da amostra e verificações."""
-    opcoes = pd.read_parquet(PASTA_SAIDA / "escolhas_v3.parquet")
+    opcoes = pd.read_parquet(exigir(PASTA_SAIDA / "escolhas_v3.parquet", "escolha.py"))
     dados = preparar_dados(opcoes)
     ajustes = {m: ajustar(dados, BASE + extra) for m, extra in MODELOS.items()}
     ajustes["M3 (bola + diferença)"] = ajustar(dados, BASE + M3_DIFERENCA)  # o M3 com outra parametrização

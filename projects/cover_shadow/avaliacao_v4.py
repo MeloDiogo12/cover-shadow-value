@@ -19,6 +19,7 @@ from pathlib import Path
 import avaliacao as av
 import numpy as np
 import pandas as pd
+from entradas import exigir
 from metrica import agregacao
 from metrica.parametros import PADRAO, Parametros
 
@@ -78,7 +79,8 @@ def guardar(resultado: dict, jogo: int, variante: str, pasta: Path = PASTA) -> N
 
 
 def ler(jogo: int, variante: str, pasta: Path = PASTA) -> dict:
-    return {t: pd.read_parquet(caminho(jogo, variante, t, pasta)) for t in tabelas_da_variante(variante, pasta)}
+    corre = "avaliar_variantes_v4.py" + (" --fundo" if pasta == PASTA_FUNDO else "") + f" (variante {variante})"
+    return {t: pd.read_parquet(exigir(caminho(jogo, variante, t, pasta), corre)) for t in tabelas_da_variante(variante, pasta)}
 
 
 # ---------------------------------------------------------------- agregação (como na v3: média por posse, soma por jogador)

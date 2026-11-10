@@ -16,6 +16,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from entradas import exigir
 from metrica import agregacao
 from metrica.parametros import PADRAO, PADRAO_V2, PADRAO_V3, Parametros
 from scipy.stats import spearmanr
@@ -116,8 +117,9 @@ def guardar_variante(resultado, jogo: int, variante: str, pasta: Path = PASTA_AV
 
 
 def ler_variante(jogo: int, variante: str, pasta: Path = PASTA_AVALIACAO) -> tuple[pd.DataFrame, pd.DataFrame]:
-    return (pd.read_parquet(caminho_variante(jogo, variante, "linhas", pasta)),
-            pd.read_parquet(caminho_variante(jogo, variante, "atribuicoes", pasta)))
+    corre = f"avaliar_variantes.py (a versão que escreve em {pasta.name}/, variante {variante})"
+    return (pd.read_parquet(exigir(caminho_variante(jogo, variante, "linhas", pasta), corre)),
+            pd.read_parquet(exigir(caminho_variante(jogo, variante, "atribuicoes", pasta), corre)))
 
 
 def variante_calculada(jogo: int, variante: str, pasta: Path = PASTA_AVALIACAO) -> bool:

@@ -21,6 +21,7 @@ import modelo_escolha as me
 import numpy as np
 import pandas as pd
 from calibracao_passe import metricas
+from entradas import exigir
 from escolha import PASTA_SAIDA
 from metrica.parametros import PADRAO
 from metrica.xt import sentido_de_ataque
@@ -125,7 +126,7 @@ def preparar(jogos=cf.JOGOS, processos: int = PROCESSOS) -> DadosXPass:
 
 
 def ler_dados() -> DadosXPass:
-    z = np.load(PASTA_DADOS / "xpass_dados.npz")
+    z = np.load(exigir(PASTA_DADOS / "xpass_dados.npz", "xpass.py preparar"))
     return DadosXPass(**{k: z[k] for k in DadosXPass._fields})
 
 
@@ -164,7 +165,7 @@ def passes_com_pose() -> pd.DataFrame:
     literatura), `sombra_bola` (cone virado para a bola, só defesas com pose) e `chegou`."""
     passes = cp.passes_do_modelo()
     d = cp.montar_dados(passes)
-    esc = me.preparar_dados(pd.read_parquet(PASTA_SAIDA / "escolhas_v3.parquet"))
+    esc = me.preparar_dados(pd.read_parquet(exigir(PASTA_SAIDA / "escolhas_v3.parquet", "escolha.py")))
     esc = esc[esc["escolhida"] == 1][["jogo", "posse_id", "sentido", "sombra_bola_pose", "sombra_tronco_pose"]]
     t = passes.merge(esc, on=["jogo", "posse_id"], how="left", validate="one_to_one")
     adv = np.stack([d.x, d.y], axis=2)  # defesas inexistentes: 1e6

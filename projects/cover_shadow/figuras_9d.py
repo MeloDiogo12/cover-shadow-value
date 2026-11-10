@@ -21,6 +21,7 @@ import idioma as idi
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from entradas import exigir
 from figuras_agregados import estilo_eixo, nota, nova_figura
 from matplotlib.colors import to_rgba
 from matplotlib.ticker import FuncFormatter
@@ -95,7 +96,7 @@ TEXTOS = {
 
 
 def ler_numeros() -> dict:
-    return json.loads((SAIDA / "artigo_v31.json").read_text(encoding="utf-8"))
+    return json.loads(exigir(SAIDA / "artigo_v31.json", "numeros_v31.py, numeros_9c.py e numeros_9d.py").read_text(encoding="utf-8"))
 
 
 # ---------------------------------------------------------------- fase e terço (parte do total e % negada)
@@ -284,8 +285,9 @@ def main() -> None:
     assert numeros.get("moeda_oficial") == "risco", "corre primeiro numeros_9d.py"
     PASTA.mkdir(parents=True, exist_ok=True)
     antigas = SAIDA / "artigo_v31_xt"
-    assert antigas.exists(), "as figuras em xT têm de estar guardadas em artigo_v31_xt/ antes de regenerar"
-    n = json.loads((PASTA / "numeros_das_figuras.json").read_text(encoding="utf-8"))
+    assert antigas.exists(), ("as figuras em xT têm de estar guardadas em artigo_v31_xt/ antes de regenerar: "
+                              "corre figuras_artigo.py e copia artigo/ para artigo_v31_xt/")
+    n = json.loads(exigir(PASTA / "numeros_das_figuras.json", "figuras_artigo.py").read_text(encoding="utf-8"))
     JG = ag.carregar_jogos()
     ag.JG_TITULOS.update({j: JG[j]["titulo"] for j in JG})
     J6, J3, JP = gc.carregar(C06["jogo"]), gc.carregar(C03["jogo"]), gc.carregar(PRESSAO_ALTA["jogo"])

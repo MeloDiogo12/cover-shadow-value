@@ -26,6 +26,7 @@ import avaliacao as av
 import modelo_escolha as me
 import numpy as np
 import pandas as pd
+from entradas import exigir
 from escolha import PASTA_SAIDA, distancia_ao_adversario_mais_proximo, recetores_marcados
 from metrica import agregacao
 from metrica.fundo import defesas_de_fundo, p_fundo_das_linhas
@@ -45,7 +46,7 @@ LIMITE_COMPRIMENTO = me.LIMITE_COMPRIMENTO  # D37: nenhuma linha acima de 35 m
 
 def ajuste_do_outro_jogo(jogo: int, modelo: str = "M2") -> me.Ajuste:
     """Ajuste do modelo de escolha (`me.BASE` + as variáveis do `modelo`) no jogo que não é `jogo` (cross-fitting)."""
-    dados = me.preparar_dados(pd.read_parquet(PASTA_SAIDA / "escolhas_v3.parquet"))
+    dados = me.preparar_dados(pd.read_parquet(exigir(PASTA_SAIDA / "escolhas_v3.parquet", "escolha.py")))
     return me.ajustar(dados[dados["jogo"] != jogo], me.BASE + me.MODELOS[modelo])
 
 
@@ -57,7 +58,7 @@ def coeficientes_do_outro_jogo(jogo: int, modelo: str = "M2") -> np.ndarray:
 def coeficientes_dos_dois_jogos(modelo: str = "M2") -> np.ndarray:
     """Coeficientes do `modelo` ajustados com os dois jogos juntos (a avaliar no próprio jogo: serve só para a
     comparação com o cross-fitting na estabilidade, C4)."""
-    dados = me.preparar_dados(pd.read_parquet(PASTA_SAIDA / "escolhas_v3.parquet"))
+    dados = me.preparar_dados(pd.read_parquet(exigir(PASTA_SAIDA / "escolhas_v3.parquet", "escolha.py")))
     return me.ajustar(dados, me.BASE + me.MODELOS[modelo]).coef
 
 
@@ -210,7 +211,7 @@ def caminho_v4(jogo: int, tabela: str, fundo: str = "completo"):
 
 
 def ler_v4(jogo: int, fundo: str = "completo") -> dict:
-    return {t: pd.read_parquet(caminho_v4(jogo, t, fundo)) for t in ("linhas", "momentos", "atribuicoes")}
+    return {t: pd.read_parquet(exigir(caminho_v4(jogo, t, fundo), f"calcular_v4.py --jogo {jogo} --fundo {fundo}")) for t in ("linhas", "momentos", "atribuicoes")}
 
 
 # ---------------------------------------------------------------- agregação (igual à v3)

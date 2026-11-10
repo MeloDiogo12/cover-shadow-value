@@ -21,6 +21,7 @@ from typing import NamedTuple
 import modelo_escolha as me
 import numpy as np
 import pandas as pd
+from entradas import exigir
 from escolha import PASTA_SAIDA
 from metrica.chegada import probabilidade_de_chegar_ao_ponto
 from metrica.linhas import probabilidade_de_bloqueio
@@ -65,7 +66,7 @@ class DadosDosPasses(NamedTuple):
 
 def passes_do_modelo(limite: float = me.LIMITE_COMPRIMENTO) -> pd.DataFrame:
     """Um passe por linha: jogo, posse, frame, recetor visado, posições, `chegou` (1/0) — só os passes do modelo da D37, sem foras de jogo."""
-    opcoes = pd.read_parquet(PASTA_SAIDA / "escolhas_v3.parquet")
+    opcoes = pd.read_parquet(exigir(PASTA_SAIDA / "escolhas_v3.parquet", "escolha.py"))
     escolhidas = me.preparar_dados(opcoes, limite)
     escolhidas = escolhidas[escolhidas["escolhida"] == 1]
     t = escolhidas[escolhidas["pass_outcome"].isin(OBSERVADOS)].copy()

@@ -15,6 +15,7 @@ import avaliacao_v31 as a31
 import figuras_agregados as ag
 import gerar_candidatos as gc
 import pandas as pd
+from entradas import exigir
 from figuras_9b import figura_momento
 from metrica import agregacao
 from metrica.parametros import PADRAO
@@ -232,7 +233,8 @@ def confirmar_v3_1_literatura(T: dict) -> dict:
     """§1: a pasta `v3_1_literatura/` (D40: com o fundo `p_fundo`) não é «v3 + 35 m»; mostra-se a diferença de totais na moeda xT."""
     saida = {}
     for j in JOGOS:
-        lit = pd.read_parquet(a31.PASTA_SAIDA / "v3_1_literatura" / f"{j}_v3_1_xt_linhas.parquet")
+        lit = pd.read_parquet(exigir(a31.PASTA_SAIDA / "v3_1_literatura" / f"{j}_v3_1_xt_linhas.parquet",
+                                 f"calcular_xpass.py --literatura --jogo {j}"))
         base = T[j]["xt"][0]
         ok = base[~base["excluida"]]
         saida[str(j)] = {"linhas_avaliadas_v3_1": len(ok), "linhas_avaliadas_literatura": int((~lit["excluida"]).sum()),

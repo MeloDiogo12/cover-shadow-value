@@ -25,6 +25,7 @@ import modelo_escolha as me
 import numpy as np
 import pandas as pd
 from calcular_v4 import ajuste_do_outro_jogo, guarda_redes_por_frame, variaveis_das_linhas
+from entradas import exigir
 from escolha import PASTA_SAIDA, distancia_ao_adversario_mais_proximo, recetores_marcados
 from metrica.chegada import valores_de_shapley
 from metrica.linhas import distancia_a_segmento, recetores_com_valor
@@ -212,11 +213,11 @@ def caminho_v4_completo(jogo: int, moeda: str, tabela: str):
 
 
 def ler_v3_1(jogo: int, moeda: str) -> dict:
-    return {t: pd.read_parquet(caminho_v3_1(jogo, moeda, t)) for t in ("linhas", "momentos", "atribuicoes")}
+    return {t: pd.read_parquet(exigir(caminho_v3_1(jogo, moeda, t), f"calcular_modelo_passe.py --jogo {jogo}")) for t in ("linhas", "momentos", "atribuicoes")}
 
 
 def ler_v4_completo(jogo: int, moeda: str) -> dict:
-    return {t: pd.read_parquet(caminho_v4_completo(jogo, moeda, t)) for t in ("linhas", "momentos", "atribuicoes")}
+    return {t: pd.read_parquet(exigir(caminho_v4_completo(jogo, moeda, t), f"calcular_modelo_passe.py --jogo {jogo}")) for t in ("linhas", "momentos", "atribuicoes")}
 
 
 def guardar(resultado: dict, jogo: int) -> None:

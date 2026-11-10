@@ -15,6 +15,7 @@ import figuras_agregados as ag
 import figuras_artigo as fa
 import figuras_lance as fl
 import gerar_candidatos as gc
+from entradas import exigir
 from orientacao_defesas import acrescentar_a_legendas
 
 from footy.paths import PROJECTS
@@ -27,7 +28,7 @@ def main() -> None:
     brand = load_brand()
     apply_theme(brand)
     numeros = f9.ler_numeros()
-    n = json.loads((PASTA / "numeros_das_figuras.json").read_text(encoding="utf-8"))
+    n = json.loads(exigir(PASTA / "numeros_das_figuras.json", "figuras_artigo.py e figuras_9d.py").read_text(encoding="utf-8"))
     JG = ag.carregar_jogos()
     ag.JG_TITULOS.update({j: JG[j]["titulo"] for j in JG})
     J6, J3, JP = gc.carregar(C06["jogo"]), gc.carregar(C03["jogo"]), gc.carregar(f9.PRESSAO_ALTA["jogo"])

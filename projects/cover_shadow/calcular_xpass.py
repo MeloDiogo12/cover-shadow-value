@@ -23,6 +23,7 @@ import pandas as pd
 import xpass as xp
 from calcular_modelo_passe import arrays_dos_defesas, linhas_sem_pose
 from calcular_v4 import ajuste_do_outro_jogo, guarda_redes_por_frame, variaveis_das_linhas
+from entradas import exigir
 from escolha import PASTA_SAIDA, distancia_ao_adversario_mais_proximo, recetores_marcados
 from metrica.linhas import recetores_com_valor
 from metrica.parametros import PADRAO
@@ -179,11 +180,11 @@ def caminho_v4(jogo: int, moeda: str, tabela: str):
 
 
 def ler_v3_1(jogo: int, moeda: str) -> dict:
-    return {t: pd.read_parquet(caminho_v3_1(jogo, moeda, t)) for t in ("linhas", "momentos", "atribuicoes")}
+    return {t: pd.read_parquet(exigir(caminho_v3_1(jogo, moeda, t), f"calcular_xpass.py --jogo {jogo}")) for t in ("linhas", "momentos", "atribuicoes")}
 
 
 def ler_v4(jogo: int, moeda: str) -> dict:
-    return {t: pd.read_parquet(caminho_v4(jogo, moeda, t)) for t in ("linhas", "momentos", "atribuicoes")}
+    return {t: pd.read_parquet(exigir(caminho_v4(jogo, moeda, t), f"calcular_xpass.py --jogo {jogo}")) for t in ("linhas", "momentos", "atribuicoes")}
 
 
 def guardar(resultado: dict, jogo: int) -> None:
@@ -209,7 +210,8 @@ def calcular_v3_1_literatura(jogo: int) -> None:
 
 
 def ler_v3_1_literatura(jogo: int, moeda: str) -> dict:
-    return {t: pd.read_parquet(PASTA_V3_1_LITERATURA / f"{jogo}_v3_1_{moeda}_{t}.parquet") for t in ("linhas", "momentos", "atribuicoes")}
+    corre = f"calcular_xpass.py --literatura --jogo {jogo}"
+    return {t: pd.read_parquet(exigir(PASTA_V3_1_LITERATURA / f"{jogo}_v3_1_{moeda}_{t}.parquet", corre)) for t in ("linhas", "momentos", "atribuicoes")}
 
 
 def main() -> None:

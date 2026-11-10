@@ -54,3 +54,12 @@ def test_frames_le_o_jsonl_de_dentro_do_zip_e_ignora_macosx(tmp_path):
 def test_pose_completa_so_existe_para_dois_jogos():
     with pytest.raises(ValueError):
         descarregar_pose(1886347)
+
+
+def test_dados_por_descarregar_dizem_que_comando_correr(tmp_path, monkeypatch):
+    from footy.ingest import skillcorner as sc
+    monkeypatch.setattr(sc, "PASTA", tmp_path)
+    with pytest.raises(FileNotFoundError, match="footy.ingest.skillcorner --jogo 1925299 --tracking --pose"):
+        sc.ler_match(1925299)
+    with pytest.raises(FileNotFoundError, match="--jogo 1874553 --tracking"):
+        sc.ler_eventos(1874553)

@@ -20,6 +20,7 @@ from typing import NamedTuple
 import numpy as np
 import pandas as pd
 from calibracao_passe import CAMPOS, curva_de_calibracao, erro_padrao, log_verosimilhanca, metricas
+from entradas import exigir
 from metrica.chegada import probabilidade_de_chegar_ao_ponto
 from metrica.parametros import PADRAO, Parametros
 from metrica.passe import pontos_das_linhas
@@ -216,7 +217,7 @@ def guardar_dados(dados: DadosFundo, funis: dict) -> None:
 
 
 def ler_dados() -> DadosFundo:
-    z = np.load(PASTA_DADOS / "calibracao_fundo_dados.npz")
+    z = np.load(exigir(PASTA_DADOS / "calibracao_fundo_dados.npz", "calibracao_fundo.py preparar"))
     return DadosFundo(**{k: z[k] for k in DadosFundo._fields})
 
 

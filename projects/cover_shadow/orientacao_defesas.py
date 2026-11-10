@@ -20,6 +20,7 @@ import figuras_agregados as ag
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from entradas import exigir
 from metrica.xt import sentido_de_ataque
 
 from footy.metrics.orientacao import angulo_para, diferenca_angular
@@ -313,7 +314,7 @@ def acrescentar_a_legendas(pasta) -> None:
     """Põe a secção da orientação no fim de `legendas.md` (substitui a anterior, se existir)."""
     ficheiro = pasta / "legendas.md"
     n = json.loads((pasta / "numeros_orientacao.json").read_text(encoding="utf-8"))
-    texto = ficheiro.read_text(encoding="utf-8")
+    texto = exigir(ficheiro, "figuras_9d.py (ou figuras_9e.py), que escreve legendas.md").read_text(encoding="utf-8")
     for titulo in ("## Orientação dos defesas", f"## {SECCAO}"):  # o título antigo (6d) também se substitui
         texto = texto.split(titulo)[0]
     texto = texto.rstrip() + "\n\n"

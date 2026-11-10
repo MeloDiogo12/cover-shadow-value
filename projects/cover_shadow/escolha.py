@@ -24,6 +24,7 @@ import time
 import numpy as np
 import pandas as pd
 from avaliacao import PASTA_AVALIACAO_V3
+from entradas import exigir
 from metrica.linhas import avaliar_frame, recetores_com_valor
 from metrica.parametros import (
     PADRAO_V3 as PADRAO,  # a tabela de escolhas é da v3 (D37 aplica o limite de 35 m depois)
@@ -257,8 +258,9 @@ def sombras_so_com_defesas_com_pose(tabela: pd.DataFrame, defesas: pd.DataFrame,
 def escolhas_do_jogo(jogo: int) -> tuple[pd.DataFrame, pd.DataFrame]:
     """(passes, opções) de um jogo, com a v3 já calculada. Recalcula só a marcação (`preparar_defesas`)."""
     match, eventos, tabela = sc.ler_match(jogo), sc.ler_eventos(jogo), carregar_tabela(jogo)
-    tronco = pd.read_parquet(PASTA_AVALIACAO_V3 / f"{jogo}_base_linhas.parquet")
-    bola = pd.read_parquet(PASTA_AVALIACAO_V3 / f"{jogo}_bola_linhas.parquet")
+    corre = "avaliar_variantes.py --versao v3 --so base bola"
+    tronco = pd.read_parquet(exigir(PASTA_AVALIACAO_V3 / f"{jogo}_base_linhas.parquet", corre))
+    bola = pd.read_parquet(exigir(PASTA_AVALIACAO_V3 / f"{jogo}_bola_linhas.parquet", corre))
 
     passes = juntar_frame_da_escolha(passes_do_jogo(eventos), tabela)
     passes["sentido"] = [sentido_de_ataque(match, e, per) for e, per in zip(passes["equipa"], passes["periodo"])]

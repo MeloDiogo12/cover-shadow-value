@@ -97,8 +97,17 @@ def descarregar_pose(jogo: int = JOGO_PADRAO) -> Path:
     return descarregar(f"{HUGGINGFACE}/raw/{jogo}.jsonl.zip", caminho_pose(jogo))
 
 
+def _exigir_descarregado(ficheiro: Path, jogo: int | None = None) -> Path:
+    """Devolve `ficheiro` se existir; senão diz que dados descarregar primeiro (só a mensagem)."""
+    if not ficheiro.exists():
+        comando = ("uv run python -m footy.ingest.skillcorner --jogo <id> --tracking [--pose]" if jogo is None else
+                   f"uv run python -m footy.ingest.skillcorner --jogo {jogo} --tracking" + (" --pose" if jogo in JOGOS_COM_POSE else ""))
+        raise FileNotFoundError(f"falta {ficheiro}\nDescarrega primeiro os dados: {comando} (ver a secção Data do README)")
+    return ficheiro
+
+
 def ler_match(jogo: int = JOGO_PADRAO) -> dict:
-    with open(caminho(jogo, "match.json"), encoding="utf-8") as f:
+    with open(_exigir_descarregado(caminho(jogo, "match.json"), jogo), encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -108,16 +117,17 @@ def dimensoes_campo(match: dict) -> tuple[float, float]:
 
 
 def ler_eventos(jogo: int = JOGO_PADRAO) -> pd.DataFrame:
-    return pd.read_csv(caminho(jogo, "dynamic_events.csv"), low_memory=False)
+    return pd.read_csv(_exigir_descarregado(caminho(jogo, "dynamic_events.csv"), jogo), low_memory=False)
 
 
 def ler_fases(jogo: int = JOGO_PADRAO) -> pd.DataFrame:
-    return pd.read_csv(caminho(jogo, "phases_of_play.csv"), low_memory=False)
+    return pd.read_csv(_exigir_descarregado(caminho(jogo, "phases_of_play.csv"), jogo), low_memory=False)
 
 
 def frames(ficheiro: Path) -> Iterator[dict]:
     """Um frame de cada vez (um objeto JSON por linha), sem carregar o jogo todo para memória.
     Serve para tracking (.jsonl) e para pose (.jsonl, .jsonl.gz ou o .jsonl.zip do jogo inteiro)."""
+    _exigir_descarregado(ficheiro)
     if ficheiro.suffix == ".zip":
         yield from _frames_do_zip(ficheiro)
         return

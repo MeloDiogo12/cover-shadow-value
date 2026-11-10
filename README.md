@@ -8,13 +8,19 @@ figures of the article.
 
 ![Cover Shadow Value on one play: who closed what](figures/en/c06_passo8_resumo.png)
 
-Article: (link to be added)
+Article: [English](paper/Cover_Shadow_Value_EN.pdf) · [Português](paper/Cover_Shadow_Value_PT.pdf)
 
 ## Requirements
 
 - Python 3.12 and [uv](https://docs.astral.sh/uv/)
 - About 3 GB of disk for the two games with body pose, plus the tracking of eighteen more games if you
   want the pass-model calibration (see below)
+- About 1 GB more for the intermediate tables (`data/interim/`, `data/processed/`) and the outputs of the full path
+- Memory: 16 GB of RAM is recommended for the full path. The parallel scripts (`avaliar_variantes.py`,
+  `avaliar_variantes_v4.py`) take `--trabalhadores N` and each worker needs 1 to 2 GB. With 6 workers on a 16 GB laptop
+  (about 5 GB free) the run stopped with `numpy._core._exceptions._ArrayMemoryError`; with 1 to 3 workers it ran to the
+  end. Use 3 workers with 8 GB or more free and 1 worker with less. `calibracao_fundo.py calibrar` (`--processos`,
+  6 by default) needs about 0.3 GB per process
 - Windows, macOS or Linux (developed on Windows)
 
 ## Install
@@ -68,24 +74,37 @@ Jelacic at phase index 157. `outputs/cover_shadow/artigo_v31.json` comes out ide
 
 ### Full path
 
-Order of the whole pipeline (each script's docstring says what it needs and writes). Steps marked * need the
-eighteen extra tracking games and take the longest; the pass-model calibration steps (6 and 7) were not rerun
-from scratch when this repository was prepared.
+The order below is the one that ran to the end, from the raw data, with nothing computed beforehand. Run it from
+`projects/cover_shadow`; each script's docstring says what it needs and writes, and a script that cannot find
+the output of an earlier step stops and tells you which step to run first. Steps 6 and 7 need the eighteen extra
+tracking games. Times are rounded and come from the run on a 16 GB Windows laptop (`--trabalhadores 3`).
 
-1. `preparar_dados.py --jogo <id>` for both games.
-2. `avaliar_variantes.py` for `--versao v2`, `--versao v3` and `--versao v3_1` (all variants; about 100 s per
-   game and variant, `--trabalhadores 6` runs them in parallel).
-3. `escolha.py`, then `modelo_escolha.py` (who the passer picks, and the conditional-logit model of that choice).
-4. `calcular_v4.py --jogo <id>` and `avaliar_variantes_v4.py` (and `--fundo`).
-5. `calibracao_passe.py`, then `calcular_modelo_passe.py --jogo <id>`.
-6. `*calibracao_fundo.py preparar`, then `calibracao_fundo.py calibrar`.
-7. `*xpass.py preparar`, `calcular_xpass.py --jogo <id>`, then `avaliacao_xpass.py` (writes `xpass_v4.json`).
-8. `reprodutibilidade_v31.py` (recomputes v3.1 from the raw data and checks that the tables match).
-9. `numeros_v31.py`, `numeros_9c.py`, `numeros_9d.py`, `orientacao_defesas.py` (all article numbers into
-   `outputs/cover_shadow/artigo_v31.json`).
-10. Figures: `figuras_9d.py` (Portuguese, writes `legendas.md`), then `figuras_10a.py --idioma en` and
-    `--idioma pt --variante escura` / `--idioma en --variante escura` for the other language and the dark
-    theme (`--variante clara` is the default). `animar_c06.py` writes the C06 animation (MP4 and one PNG per step).
+| # | Command | About |
+|---|---|---|
+| 1 | `preparar_dados.py --jogo <id>` for both games | 2 min per game |
+| 2 | `avaliar_variantes.py --versao v2`, then `--versao v3`, then `--versao v3_1` (`--trabalhadores 3`) | about 30 min per version |
+| 3 | `escolha.py`, then `modelo_escolha.py` (who the passer picks, and the conditional-logit model of that choice) | 1 min |
+| 4 | `calcular_v4.py --jogo <id>` for both games, then `avaliar_variantes_v4.py`, then `avaliar_variantes_v4.py --fundo` | 5, 41 and 15 min |
+| 5 | `calibracao_passe.py`, then `calcular_modelo_passe.py --jogo <id>` for both games | 6 and 6 min |
+| 6 | `calibracao_fundo.py preparar`, then `calibracao_fundo.py calibrar` (writes `calibracao_20_jogos.json`) | under 1 min and 187 min (3 h) |
+| 7 | `xpass.py preparar`, `calcular_xpass.py --jogo <id>` for both games, `calcular_xpass.py --literatura --jogo <id>` for both games, then `avaliacao_xpass.py` (writes `xpass_v4.json`) | under 1, 6, 6 and 1 min |
+| 8 | `reprodutibilidade_v31.py` (recomputes v3.1 from the raw data and checks that the tables match) | 8 min |
+| 9 | `numeros_v31.py`, `numeros_9c.py`, `numeros_9d.py` (all article numbers into `outputs/cover_shadow/artigo_v31.json`) | 2, 3 and 7 min |
+| 10 | Figures: `figuras_artigo.py`, then copy `outputs/cover_shadow/artigo/` to `outputs/cover_shadow/artigo_v31_xt/`, then `figuras_9d.py` (Portuguese, writes `legendas.md`) and `figuras_9e.py` | 2, under 1, 1.5 and 1.5 min |
+| 11 | `orientacao_defesas.py` (adds the orientation section to `legendas.md`, so it comes after the figures) | under 1 min |
+| 12 | `figuras_10a.py --idioma pt`, `--idioma en`, `--idioma pt --variante escura` and `--idioma en --variante escura` (`--variante clara` is the default) | 1.5 min each |
+
+The whole path takes about 6.5 to 7 hours, 3 of them in step 6. In step 7, `avaliacao_xpass.py` reads the tables
+written by `calcular_xpass.py --literatura`, so that command must run before it.
+`animar_c06.py` writes the C06 animation (MP4 and one PNG per step); it is not part of the path above.
+
+**Check.** Steps 1 to 9 were run from scratch, from the raw SkillCorner files into empty `data/interim/`, `data/processed/`
+and `outputs/` folders, and reproduce the numbers of the article: `artigo_v31.json`, `calibracao_passe.json`,
+`calibracao_20_jogos.json`, `xpass_v4.json` and `reprodutibilidade_v31.json` come out equal to the reference copies with a
+tolerance of 1e-9 (only the timing fields and the test counts differ). The intermediate tables match on every shared column
+(the `*_linhas` tables of this code have one more column than the reference: `comprimento` in v2 and v3, `p_fundo` in v4).
+Steps 10 to 12 give 64 figures (16 figures, in Portuguese and English, light and dark theme) identical pixel by pixel to the ones in
+`figures/` (maximum difference 0, no pixel different); they were run on tables that match the fresh run of steps 1 to 9 to the same tolerance.
 
 The notebooks in `projects/cover_shadow/notebooks/` tell the same story step by step, with their outputs.
 
@@ -148,9 +167,12 @@ defesa (dado pela *body pose*, não pela bola) fecha as linhas de passe que o at
 desarme nem interceção. Este repositório calcula a métrica com os dados abertos da SkillCorner (A-League 2024/25) e
 reproduz os números e as figuras do artigo.
 
+Artigo: [English](paper/Cover_Shadow_Value_EN.pdf) · [Português](paper/Cover_Shadow_Value_PT.pdf)
+
 - **Instalar:** `uv sync` (Python 3.12 e uv). Testes: `uv run pytest -q`.
 - **Dados:** não vêm no repositório. Descarregam-se com `uv run python -m footy.ingest.skillcorner --jogo <id> --tracking --pose`
   (jogos 1925299 e 1996435, cerca de 700 MB cada); os outros 18 jogos abertos só com tracking servem para calibrar o modelo do passe.
-- **Reproduzir:** a ordem dos comandos está na secção *Reproduce*; os números do artigo ficam em `outputs/cover_shadow/artigo_v31.json`.
+- **Reproduzir:** a ordem dos comandos está na secção *Reproduce* (cerca de 7 horas no total, 3 só no passo 6; 16 GB de RAM
+  recomendados e `--trabalhadores` entre 1 e 3); os números do artigo ficam em `outputs/cover_shadow/artigo_v31.json`.
 - **Figuras:** `figures/pt/` e `figures/en/` (tema claro, artigo) e `figures/social/` (tema escuro, redes sociais).
 - **Decisões de método:** `projects/cover_shadow/DECISOES.md`. O código e os comentários estão em português.
