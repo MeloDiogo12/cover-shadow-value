@@ -12,8 +12,8 @@ import argparse
 import json
 
 import gerar_candidatos as gc
+import idioma as idi
 from animacoes import APELIDO_REALCE, FPS, Quadro
-from figuras_agregados import ROTULOS_CONTEXTO
 
 from footy.paths import output_dir
 from footy.viz.theme import apply_theme, load_brand
@@ -21,7 +21,7 @@ from footy.viz.theme import apply_theme, load_brand
 C06 = {"jogo": 1925299, "frame": 12660, "rotulo": "C06 · 1.ª parte · minuto 21"}
 
 
-def indice_do_realce() -> dict | None:
+def indice_do_realce(idioma: str = "pt") -> dict | None:
     """Índice do defesa em destaque (Jelacic) na fase defensiva do lance, em risco: lido de `artigo_v31.json` (secção `risco.c06`, `numeros_9d.py`)."""
     ficheiro = output_dir("cover_shadow") / "artigo_v31.json"
     if not ficheiro.exists():
@@ -30,9 +30,9 @@ def indice_do_realce() -> dict | None:
     if not c06:
         return None
     achados = {n: v for n, v in c06["por_defesa"].items() if APELIDO_REALCE.lower() in n.lower()}
-    if not achados or c06["fase"] not in ROTULOS_CONTEXTO:
+    if not achados or c06["fase"] not in idi.ROTULOS_CONTEXTO[idioma]:
         return None
-    return {"nome": APELIDO_REALCE, "fase": ROTULOS_CONTEXTO[c06["fase"]], "indice": next(iter(achados.values()))["indice_na_fase"],
+    return {"nome": APELIDO_REALCE, "fase": idi.ROTULOS_CONTEXTO[idioma][c06["fase"]], "indice": next(iter(achados.values()))["indice_na_fase"],
             "percentil": next(iter(achados.values()))["percentil_na_fase"]}
 
 
@@ -41,12 +41,13 @@ def main() -> None:
     ap.add_argument("--so-imagens", action="store_true")
     ap.add_argument("--segundos", type=float, default=None, help="limita o vídeo a estes segundos (teste)")
     ap.add_argument("--idioma", default="pt")
-    ap.add_argument("--nome", default="c06_pt_16x9")
+    ap.add_argument("--nome", default=None, help="por omissão c06_<idioma>_16x9")
     args = ap.parse_args()
+    args.nome = args.nome or f"c06_{args.idioma}_16x9"
     brand = load_brand(variante="escura")  # animação: variante escura (vídeo)
     apply_theme(brand)
     from animacoes import Configuracao
-    quadro = Quadro(gc.carregar(C06["jogo"]), C06["frame"], C06["rotulo"], brand, Configuracao(idioma=args.idioma, extra={"indice_realce": indice_do_realce()}))
+    quadro = Quadro(gc.carregar(C06["jogo"]), C06["frame"], C06["rotulo"], brand, Configuracao(idioma=args.idioma, extra={"indice_realce": indice_do_realce(args.idioma)}))
     pasta = output_dir("cover_shadow") / "animacoes"
     zero = quadro.plano[0][0] == "abertura"  # o cartão de abertura é o passo 0; os restantes mantêm a numeração anterior
     for i in range(len(quadro.plano)):

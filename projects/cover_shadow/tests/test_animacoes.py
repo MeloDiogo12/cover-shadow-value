@@ -68,8 +68,24 @@ def test_primeiro_passo_em_tempo_real():
     assert DURACOES["contexto"] == JANELA_JOGO_S
 
 
-def test_prototipo_dura_entre_40_e_55_segundos():
-    assert 40 <= sum(DURACOES[n] for n in ORDEM) <= 55
+def test_prototipo_dura_entre_40_e_60_segundos():
+    assert 40 <= sum(DURACOES[n] for n in ORDEM) <= 60
+
+
+def test_valor_final_fica_1_5_s_parado_nos_passos_da_ameaca_negada_e_do_cone_virado_para_a_bola():
+    from animacoes import PAUSA_FINAL_S
+    plano = cronograma()
+    for nome in ("valor", "tronco_vs_bola"):
+        _, _, fim = next(p for p in plano if p[0] == nome)
+        assert PAUSA_FINAL_S == 1.5
+        assert estado_em(fim - PAUSA_FINAL_S - 0.01, plano)[3] < 1.0  # ainda a animar um instante antes da pausa
+        assert estado_em(fim - PAUSA_FINAL_S, plano)[3] == 1.0 and estado_em(fim - 0.01, plano)[3] == 1.0
+
+
+def test_percentagens_em_pt_sem_espaco_antes_do_percento():
+    assert texto("pt", "legenda_valor", pct="9,6") == "Ameaça negada: 9,6% do perigo do lance"
+    assert texto("pt", "painel_perigo", pct="9,6") == "9,6% do perigo"
+    assert all(" %" not in v for v in TEXTOS["pt"].values())
 
 
 def test_cartao_de_abertura_e_o_primeiro_passo_e_dura_cerca_de_4_segundos():

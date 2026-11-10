@@ -38,10 +38,11 @@ from figuras_lance import (
     vista_do_lance,
 )
 from matplotlib import animation
+from matplotlib.colors import to_rgba
 from matplotlib.patches import Polygon, Rectangle
 from metrica.parametros import PADRAO
 from metrica.sombra import contorno_do_cone
-from revisao import MARCACAO_TRACO, novo_campo, pt, vista_em_torno
+from revisao import MARCACAO_TRACO, novo_campo, vista_em_torno
 
 from footy.ingest import skillcorner as sc
 from footy.metrics.orientacao import vetor
@@ -63,9 +64,11 @@ MARGEM_EXPLICACAO = 8.0  # m à volta dos jogadores que entram na explicação
 
 ORDEM = ("abertura", "contexto", "pausa", "linhas", "marcacao", "corpo", "cones", "probabilidade", "valor",
          "tronco_vs_bola", "cartao")
-DURACOES = {  # segundos de cada passo
+PAUSA_FINAL_S = 1.5  # o valor final fica parado no ecrã mais este tempo, depois de a animação do passo acabar (10f)
+PAUSAS = {"valor": PAUSA_FINAL_S, "tronco_vs_bola": PAUSA_FINAL_S}  # os passos com pausa no fim
+DURACOES = {  # segundos de cada passo (a pausa final já conta)
     "abertura": 4.0, "contexto": 6.0, "pausa": 2.0, "linhas": 5.0, "marcacao": 4.0, "corpo": 6.0, "cones": 5.0,
-    "probabilidade": 6.0, "valor": 6.0, "tronco_vs_bola": 6.0, "cartao": 4.0,
+    "probabilidade": 6.0, "valor": 6.0 + PAUSA_FINAL_S, "tronco_vs_bola": 6.0 + PAUSA_FINAL_S, "cartao": 4.0,
 }
 VELOCIDADE_CONTEXTO = JANELA_JOGO_S / DURACOES["contexto"]  # 1 = tempo real; < 1 seria câmara lenta
 
@@ -80,6 +83,10 @@ COMPRIMENTO_SETA = 3.0  # m
 COMPRIMENTO_SETA_REALCE = 6.0  # m, a do Jelacic no passo da orientação
 APELIDO_REALCE = "Jelacic"
 MOEDA = "risco"  # as linhas, a ameaça negada e o Shapley do vídeo estão em risco (D44); a versão em xT está em `animacoes/v31_xt/`
+# cones na variante escura (10f): o azul sobre o relvado escuro perdia-se num ecrã de telemóvel. Mais opacidade e contorno mais grosso,
+# mas o cone fica por baixo das linhas (zorder 3) e dos jogadores, por isso continua a não tapar nada. Índice: defesa relevante?
+OPACIDADE_CONE = {True: 0.55, False: 0.26}  # só o preenchimento; o contorno é opaco
+LARGURA_CONTORNO_CONE = {True: 2.6, False: 1.6}
 FRACOES_ETIQUETA = (0.55, 0.65, 0.45, 0.75, 0.35, 0.85, 0.25, 0.9, 0.18, 0.5)  # onde tentar pôr a etiqueta de cada linha
 
 TEXTOS = {
@@ -96,7 +103,7 @@ TEXTOS = {
         "legenda_corpo": "A sombra nasce atrás do tronco",
         "legenda_cones": "Um cone de {angulo}° e {comprimento} m atrás de quem não marca",
         "legenda_probabilidade": "Índice de chegada: quanto a sombra fecha a linha",
-        "legenda_valor": "Ameaça negada: {pct} % do perigo do lance",
+        "legenda_valor": "Ameaça negada: {pct}% do perigo do lance",
         "legenda_tronco_vs_bola": "E se todos olhassem para a bola? O corpo muda o valor",
         "legenda_cartao": "",
         "leg_ataque": "azul = {equipa} (com bola)",
@@ -104,7 +111,7 @@ TEXTOS = {
         "leg_gr": "GR (excluído)",
         "leg_contorno": "contorno = sem dado direto",
         "painel_valor": "Ameaça negada (risco)",
-        "painel_perigo": "{pct} % do perigo",
+        "painel_perigo": "{pct}% do perigo",
         "painel_chegada_titulo": "Índice de chegada",
         "painel_chegada_para": "para {recetor}",
         "painel_chegada_nota1": "perto de 0 = linha fechada · perto de 1 = linha aberta",
@@ -124,7 +131,47 @@ TEXTOS = {
         "cartao_subtitulo": "A ameaça que a defesa nega sem tocar na bola",
         "cartao_credito": "Dados: {fonte} · {handle}",
     },
-    "en": {},  # vem depois da aprovação do protótipo em PT
+    "en": {
+        "titulo": "{jogo} · {parte} · {minuto}'",
+        "subtitulo": "{equipa} in possession",
+        "parte_1": "first half",
+        "parte_2": "second half",
+        "legenda_abertura": "",
+        "legenda_contexto": "Defending: {equipa_defesa} ({cor_defesa})",
+        "legenda_pausa": "{portador} is the ball carrier. Who gets the pass?",
+        "legenda_linhas": "Each lane is worth the threat it creates and the risk of losing the ball",
+        "legenda_marcacao": "A defender marking an opponent adds no cover shadow",
+        "legenda_corpo": "The cover shadow starts behind the trunk",
+        "legenda_cones": "Trunk-based cone: {angulo}° and {comprimento} m behind defenders not marking",
+        "legenda_probabilidade": "Arrival index: how much the shadow closes the lane",
+        "legenda_valor": "Denied threat: {pct}% of the play's threat",
+        "legenda_tronco_vs_bola": "What if everyone faced the ball? The body changes the value",
+        "legenda_cartao": "",
+        "leg_ataque": "blue = {equipa} (in possession)",
+        "leg_defesa": "{cor_defesa} = {equipa} (defending)",
+        "leg_gr": "GK (excluded)",
+        "leg_contorno": "outline = no direct data",
+        "painel_valor": "Denied threat (risk)",
+        "painel_perigo": "{pct}% of the threat",
+        "painel_chegada_titulo": "Arrival index",
+        "painel_chegada_para": "to {recetor}",
+        "painel_chegada_nota1": "near 0 = lane closed · near 1 = lane open",
+        "painel_chegada_nota2": "it is an index, not a calibrated probability",
+        "painel_perigo_total": "threat of the play: {perigo} (risk)",
+        "painel_indice": "{nome}: ahead of {percentil}%",
+        "painel_indice_nota": "of players in {fase} · {vezes}× the average (phase index {indice})",
+        "painel_tronco": "Trunk-based cone",
+        "painel_bola": "Ball-facing cone",
+        "inset_titulo": "{nome}, seen from above",
+        "inset_ombros": "shoulders",
+        "inset_ancas": "hips",
+        "inset_tronco": "front of the trunk",
+        "abertura_pergunta": "How much is it worth to close a passing lane without touching the ball?",
+        "abertura_defesa": "Defending: {equipa_defesa} ({cor_defesa})",
+        "cartao_titulo": "Cover Shadow Value",
+        "cartao_subtitulo": "The threat the defence denies without touching the ball",
+        "cartao_credito": "Data: {fonte} · {handle}",
+    },
 }
 
 
@@ -146,11 +193,13 @@ def cronograma(duracoes: dict = DURACOES, ordem: tuple = ORDEM) -> list[tuple[st
 
 
 def estado_em(t: float, plano: list[tuple[str, float, float]]) -> tuple[int, str, float, float]:
-    """(índice do passo, nome, segundos desde o início do passo, progresso 0–1) no instante t."""
+    """(índice do passo, nome, segundos desde o início do passo, progresso 0–1) no instante t.
+
+    O progresso acaba onde começa a pausa final do passo (`PAUSAS`): a animação não abranda, o valor só fica mais tempo parado."""
     for i, (nome, ini, fim) in enumerate(plano):
         if t < fim or i == len(plano) - 1:
             tp = float(np.clip(t - ini, 0, fim - ini))
-            return i, nome, tp, tp / (fim - ini)
+            return i, nome, tp, min(tp / (fim - ini - PAUSAS.get(nome, 0.0)), 1.0)
     raise ValueError("cronograma vazio")
 
 
@@ -351,8 +400,8 @@ class Quadro:
         self.cfg = cfg or Configuracao()
         self.brand, self.cor, self.idioma = brand, brand.colors, self.cfg.idioma
         self.J, self.frame = J, frame
-        self.L = Lance(J, frame, rotulo, brand, moeda=MOEDA)  # D44: a moeda oficial
-        self.Lb = Lance(J, frame, rotulo, brand, "bola", MOEDA)
+        self.L = Lance(J, frame, rotulo, brand, moeda=MOEDA, idioma=self.idioma)  # D44: a moeda oficial
+        self.Lb = Lance(J, frame, rotulo, brand, "bola", MOEDA, idioma=self.idioma)
         self.papeis = papeis_do_lance(self.L)
         self.plano = cronograma(DURACOES, tuple(p for p in ORDEM if p in self.cfg.incluir))
         self.duracao = self.plano[-1][2]
@@ -363,6 +412,7 @@ class Quadro:
         self.vista_inteira = vista_campo(*J["campo"])
         n = round(JANELA_JOGO_S * 10)
         self.percurso = ler_percurso(sc.caminho(J["jogo"], "tracking_extrapolated.jsonl"), frame - n, frame, list(self.papeis))
+        self.pt = idi.formatadores(self.idioma)[0]  # «0,0109» em pt, «0.0109» em en
         self.parte = texto(self.idioma, f"parte_{self.L.d['periodo']}")
         self._montar_figura()
 
@@ -378,7 +428,7 @@ class Quadro:
         self.legendas_reduzidas: dict[str, int] = {}  # chave da legenda -> tamanho a que teve de descer
         self.t_legenda = self.fig.text(0.5, 0.118, "", fontsize=34, fontweight="bold", color=cor["text"], ha="center", va="center",
                                        linespacing=1.15)
-        self.t_credito = self.fig.text(0.5, 0.015, self.brand.credit(FONTE), ha="center", va="bottom", color=cor["text_muted"], fontsize=13)
+        self.t_credito = self.fig.text(0.5, 0.015, idi.marca(self.brand, self.idioma).credit(FONTE), ha="center", va="bottom", color=cor["text_muted"], fontsize=13)
         self._legenda_de_cores()
         self.ax = self.fig.add_axes(AREA_CAMPO)
         novo_campo(self.brand, *self.J["campo"]).draw(ax=self.ax)
@@ -462,8 +512,8 @@ class Quadro:
     def _legenda_do_passo(self, nome: str, tp: float, dur: float) -> None:
         n = self.numeros["tronco"]
         chave = f"legenda_{nome}"
-        s = texto(self.idioma, chave, portador=apelido(self.L.nomes, self.L.portador), pct=pt(n["pct_negada"], 1),
-                  angulo=pt(PADRAO.angulo_cone, 0), comprimento=pt(PADRAO.comprimento_cone, 0), equipa_defesa=self.L.equipa_a_defender)
+        s = texto(self.idioma, chave, portador=apelido(self.L.nomes, self.L.portador), pct=self.pt(n["pct_negada"], 1),
+                  angulo=self.pt(PADRAO.angulo_cone, 0), comprimento=self.pt(PADRAO.comprimento_cone, 0), equipa_defesa=self.L.equipa_a_defender)
         linhas = textwrap.fill(s, 60)
         self.t_legenda.set_text(linhas)
         tamanho = 34 if len(linhas.splitlines()) == 1 else 29
@@ -533,7 +583,7 @@ class Quadro:
                 ax.scatter([x], [y], s=(300 + 900 * v / L.shapley.max()) * ESCALA_MARCADOR, facecolor="none",
                            edgecolor=cor["primary"], lw=3.0, zorder=6)
             if (nome == "valor" and p > 0.7) or (bola_fase and p > 0.85):
-                extra = {jg: pt(v, 4) for jg, v in L.shapley.items()}
+                extra = {jg: self.pt(v, 4) for jg, v in L.shapley.items()}
         # -- Jelacic em realce (passo da orientação)
         self._realce(L, nome, tp, p)
         # -- etiquetas
@@ -591,7 +641,7 @@ class Quadro:
                 reveal = com_estagio(k, n_linhas, min(p / 0.7, 1.0), 0.5)  # todas desenhadas aos 70 % do passo
                 c, lw = fecha_xt
                 if reveal >= 0.999 and perigosa:
-                    rotulos.append((destino, pt(linha["valor_xt"], 4)))
+                    rotulos.append((destino, self.pt(linha["valor_xt"], 4)))
             elif nome == "marcacao":
                 c, lw = self._mistura_estilo(fecha_xt, fecha_cinza, janela(tp, 0, ENTRADA_S))
             elif nome in ("corpo", "cones"):
@@ -605,7 +655,7 @@ class Quadro:
                     lw = (1.5 + 3.5 * v) * ESCALA_TRACO
                     c = cor["primary"]
                     if v < 0.95 + 1e-9 and linha["p_chegar"] < 0.95:
-                        rotulos.append((destino, pt(v, 2)))
+                        rotulos.append((destino, self.pt(v, 2)))
                 else:
                     c, lw = fecha_cinza
             tracos.append(((ox, oy, ox + reveal * (destino[0] - ox), oy + reveal * (destino[1] - oy)),
@@ -646,8 +696,8 @@ class Quadro:
                 largura_seta = (2.4 + 2.2 * e) * ESCALA_TRACO
             relevante = j["jogador"] in L.shapley.index
             if cone > 0.01:
-                ax.add_patch(Polygon(cone_ate(j["x"], j["y"], j["orientacao"], cone), closed=True, facecolor=cor["secondary"],
-                                     alpha=0.26 if relevante else 0.09, edgecolor=cor["secondary"], lw=1.2 if relevante else 0.6,
+                ax.add_patch(Polygon(cone_ate(j["x"], j["y"], j["orientacao"], cone), closed=True, facecolor=to_rgba(cor["secondary"], OPACIDADE_CONE[relevante]),
+                                     edgecolor=cor["secondary"], lw=LARGURA_CONTORNO_CONE[relevante],
                                      zorder=1))
             if seta * comprimento > 0.35:
                 fx, fy = vetor(j["orientacao"])
@@ -719,7 +769,7 @@ class Quadro:
         fundo = cor["background"]
         ax.text(0, 0.97, texto(i, "painel_chegada_titulo"), fontsize=20, fontweight="bold", va="top",
                 color=mistura(cor["text_muted"], fundo, saida))
-        ax.text(0, 0.90, pt(valor, 2), fontsize=52, fontweight="bold", va="top", color=mistura(cor["primary"], fundo, saida))
+        ax.text(0, 0.90, self.pt(valor, 2), fontsize=52, fontweight="bold", va="top", color=mistura(cor["primary"], fundo, saida))
         ax.text(0, 0.775, texto(i, "painel_chegada_para", recetor=recetor), fontsize=26, va="top",
                 color=mistura(cor["text"], fundo, saida))
         ax.text(0, 0.68, texto(i, "painel_chegada_nota1").replace(" · ", "\n") + "\n" + textwrap.fill(texto(i, "painel_chegada_nota2"), 28),
@@ -741,11 +791,11 @@ class Quadro:
                 numeros, rotulo, barras = bo, "painel_bola", suave(janela(p, 0.45, 0.85))
         ax.text(0, 0.97, texto(i, rotulo) if rotulo else texto(i, "painel_valor"), fontsize=20, color=cor["text_muted"], va="top",
                 fontweight="bold")
-        ax.text(0, 0.90, pt(valor, 4), fontsize=52, fontweight="bold", color=cor["primary"], va="top")
+        ax.text(0, 0.90, self.pt(valor, 4), fontsize=52, fontweight="bold", color=cor["primary"], va="top")
         if nome == "valor" and p > 0.5:
-            ax.text(0, 0.775, texto(i, "painel_perigo", pct=pt(numeros["pct_negada"], 1)), fontsize=26, color=cor["text"], va="top")
+            ax.text(0, 0.775, texto(i, "painel_perigo", pct=self.pt(numeros["pct_negada"], 1)), fontsize=26, color=cor["text"], va="top")
         if nome == "valor" and p > 0.5 or nome == "tronco_vs_bola":
-            ax.text(0, 0.70 if nome == "valor" else 0.775, texto(i, "painel_perigo_total", perigo=pt(numeros["perigo_total_xt"], 3)), fontsize=16,
+            ax.text(0, 0.70 if nome == "valor" else 0.775, texto(i, "painel_perigo_total", perigo=self.pt(numeros["perigo_total_xt"], 3)), fontsize=16,
                     color=cor["text_muted"], va="top")
         partes = sorted(numeros["shapley"].items(), key=lambda kv: -kv[1])
         maximo = max(v for _, v in partes)
@@ -753,12 +803,12 @@ class Quadro:
         for k, (quem, v) in enumerate(partes):
             f = suave(janela(barras, 0.0, 1.0))
             ax.text(0, y, quem, fontsize=20, color=cor["text"], va="bottom")
-            ax.text(1.0, y, pt(v * f, 4), fontsize=20, color=cor["text"], va="bottom", ha="right")
+            ax.text(1.0, y, self.pt(v * f, 4), fontsize=20, color=cor["text"], va="bottom", ha="right")
             ax.add_patch(Rectangle((0, y - 0.035), 1.0 * v / maximo * f, 0.025, facecolor=cor["primary"], edgecolor="none"))
             y -= 0.115
         indice = self.cfg.extra.get("indice_realce")
         if nome == "valor" and indice and p > 0.75:
-            leitura = leitura_do_indice(indice["indice"], indice["percentil"])
+            leitura = leitura_do_indice(indice["indice"], indice["percentil"], self.idioma)
             ax.text(0, y + 0.02, texto(i, "painel_indice", nome=indice["nome"], percentil=leitura["percentil"]), fontsize=22,
                     fontweight="bold", color=cor["primary"], va="top")
             nota = texto(i, "painel_indice_nota", fase=indice["fase"], vezes=leitura["vezes"], indice=leitura["indice"])
