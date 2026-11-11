@@ -8135,5 +8135,140 @@
     }
    }
   }
+ },
+ "revisao": {
+  "definicao": {
+   "negada_por_momento": "soma do Shapley (risco) de cada jogador a dividir pelos momentos em que está na equipa sem bola",
+   "costas": "frente do tronco a mais de 90° da direção do portador (sem guarda-redes, só com pose)"
+  },
+  "costas": {
+   "observacoes": 124671,
+   "pct_observacoes_acima_de_90": 4.068307786092997,
+   "pct_negada_acima_de_90": 8.062644958363192,
+   "pct_negada_acima_de_135": 2.5151215878551487,
+   "pct_negada_sem_angulo": 0.0
+  },
+  "c5_por_momento": {
+   "variante": "bola",
+   "rho_media": 0.9278975741239891,
+   "rho_minimo": 0.7999999999999999
+  },
+  "c4_por_momento": [
+   {
+    "variante": "angulo_cone=45",
+    "rho_media": 1.0,
+    "rho_minimo": 0.9999999999999999
+   },
+   {
+    "variante": "angulo_cone=90",
+    "rho_media": 0.9971698113207547,
+    "rho_minimo": 0.9833333333333333
+   },
+   {
+    "variante": "comprimento_cone=8",
+    "rho_media": 0.9869721473495059,
+    "rho_minimo": 0.8999999999999998
+   },
+   {
+    "variante": "comprimento_cone=12",
+    "rho_media": 0.9530098831985625,
+    "rho_minimo": 0.7
+   },
+   {
+    "variante": "largura_junto_ao_corpo=1",
+    "rho_media": 0.9935759209344114,
+    "rho_minimo": 0.9761904761904763
+   },
+   {
+    "variante": "largura_junto_ao_corpo=3",
+    "rho_media": 0.9964061096136568,
+    "rho_minimo": 0.9761904761904763
+   },
+   {
+    "variante": "tempo_reacao=0.5",
+    "rho_media": 0.9735849056603773,
+    "rho_minimo": 0.7999999999999999
+   },
+   {
+    "variante": "tempo_reacao=0.9",
+    "rho_media": 0.977538185085355,
+    "rho_minimo": 0.8999999999999998
+   },
+   {
+    "variante": "velocidade_bola=12",
+    "rho_media": 0.9699910152740341,
+    "rho_minimo": 0.7999999999999999
+   },
+   {
+    "variante": "velocidade_bola=18",
+    "rho_media": 0.977538185085355,
+    "rho_minimo": 0.8999999999999998
+   },
+   {
+    "variante": "incerteza_tempo=0.3",
+    "rho_media": 0.9905660377358491,
+    "rho_minimo": 0.8999999999999998
+   },
+   {
+    "variante": "incerteza_tempo=0.6",
+    "rho_media": 0.9971698113207547,
+    "rho_minimo": 0.9833333333333333
+   },
+   {
+    "variante": "tempo_marcacao=0.5",
+    "rho_media": 0.9718778077268644,
+    "rho_minimo": 0.7999999999999999
+   },
+   {
+    "variante": "tempo_marcacao=1.5",
+    "rho_media": 0.9282120395327943,
+    "rho_minimo": 0.7857142857142858
+   },
+   {
+    "variante": "distancia_marcacao=3",
+    "rho_media": 0.9877358490566037,
+    "rho_minimo": 0.8999999999999998
+   },
+   {
+    "variante": "distancia_marcacao=5",
+    "rho_media": 0.9843216531895776,
+    "rho_minimo": 0.9500000000000001
+   },
+   {
+    "variante": "raio_bloqueio_corpo=0",
+    "rho_media": 0.3095238095238095,
+    "rho_minimo": -0.3
+   },
+   {
+    "variante": "raio_bloqueio_corpo=0.5",
+    "rho_media": 0.9409254267744834,
+    "rho_minimo": 0.7
+   },
+   {
+    "variante": "raio_bloqueio_corpo=0.7",
+    "rho_media": 0.9539532794249775,
+    "rho_minimo": 0.7999999999999999
+   },
+   {
+    "variante": "raio_bloqueio_corpo=1",
+    "rho_media": 0.9437556154537287,
+    "rho_minimo": 0.7999999999999999
+   },
+   {
+    "variante": "raio_bloqueio_corpo=1.5",
+    "rho_media": 0.934681042228212,
+    "rho_minimo": 0.7999999999999999
+   },
+   {
+    "variante": "comprimento_maximo_linha=30",
+    "rho_media": 0.955256064690027,
+    "rho_minimo": 0.7999999999999999
+   },
+   {
+    "variante": "comprimento_maximo_linha=40",
+    "rho_media": 0.9807277628032345,
+    "rho_minimo": 0.9285714285714287
+   }
+  ]
  }
 }

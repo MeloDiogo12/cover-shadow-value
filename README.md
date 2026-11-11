@@ -89,7 +89,7 @@ tracking games. Times are rounded and come from the run on a 16 GB Windows lapto
 | 6 | `calibracao_fundo.py preparar`, then `calibracao_fundo.py calibrar` (writes `calibracao_20_jogos.json`) | under 1 min and 187 min (3 h) |
 | 7 | `xpass.py preparar`, `calcular_xpass.py --jogo <id>` for both games, `calcular_xpass.py --literatura --jogo <id>` for both games, then `avaliacao_xpass.py` (writes `xpass_v4.json`) | under 1, 6, 6 and 1 min |
 | 8 | `reprodutibilidade_v31.py` (recomputes v3.1 from the raw data and checks that the tables match) | 8 min |
-| 9 | `numeros_v31.py`, `numeros_9c.py`, `numeros_9d.py` (all article numbers into `outputs/cover_shadow/artigo_v31.json`) | 2, 3 and 7 min |
+| 9 | `numeros_v31.py`, `numeros_9c.py`, `numeros_9d.py`, then `numeros_revisao.py` (all article numbers into `outputs/cover_shadow/artigo_v31.json`) | 2, 3, 7 and about 5 min |
 | 10 | Figures: `figuras_artigo.py`, then copy `outputs/cover_shadow/artigo/` to `outputs/cover_shadow/artigo_v31_xt/`, then `figuras_9d.py` (Portuguese, writes `legendas.md`) and `figuras_9e.py` | 2, under 1, 1.5 and 1.5 min |
 | 11 | `orientacao_defesas.py` (adds the orientation section to `legendas.md`, so it comes after the figures) | under 1 min |
 | 12 | `figuras_10a.py --idioma pt`, `--idioma en`, `--idioma pt --variante escura` and `--idioma en --variante escura` (`--variante clara` is the default) | 1.5 min each |
@@ -103,6 +103,9 @@ and `outputs/` folders, and reproduce the numbers of the article: `artigo_v31.js
 `calibracao_20_jogos.json`, `xpass_v4.json` and `reprodutibilidade_v31.json` come out equal to the reference copies with a
 tolerance of 1e-9 (only the timing fields and the test counts differ). The intermediate tables match on every shared column
 (the `*_linhas` tables of this code have one more column than the reference: `comprimento` in v2 and v3, `p_fundo` in v4).
+`numeros_revisao.py`, added with the final revision of the article (defenders with their back to the ball carrier, section 6.3, and
+the ρ of denied threat per moment, sections 7.3 and 7.4), was run afterwards on tables that match the fresh run of steps 1 to 9; it only
+adds the `revisao` section to `artigo_v31.json` and leaves the rest of the file unchanged.
 Steps 10 to 12 give 64 figures (16 figures, in Portuguese and English, light and dark theme) identical pixel by pixel to the ones in
 `figures/` (maximum difference 0, no pixel different); they were run on tables that match the fresh run of steps 1 to 9 to the same tolerance.
 
